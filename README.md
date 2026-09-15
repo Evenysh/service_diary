@@ -34,7 +34,9 @@
 
 - Python 3.x;
 - pytest;
-- flake8.
+- flake8;
+- isort;
+- black.
 
 Установка зависимостей:
 
@@ -59,6 +61,11 @@ pytest
 ```bash
 flake8
 ```
+
+## Форматирование кода
+
+```bash
+black .
 
 ## Формат данных
 

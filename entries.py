@@ -33,8 +33,7 @@ def find_entry(entries: dict[int, dict], query: str) -> list[dict]:
     """Найти записи по подстроке в заголовке."""
     query_lower = query.lower()
     return [
-        entry for entry in entries.values()
-        if query_lower in entry["title"].lower()
+        entry for entry in entries.values() if query_lower in entry["title"].lower()
     ]
 
 
@@ -43,10 +42,7 @@ def filter_entries_by_category(
     category: str,
 ) -> list[dict]:
     """Отобрать записи по категории."""
-    return [
-        entry for entry in entries.values()
-        if entry["category"] == category
-    ]
+    return [entry for entry in entries.values() if entry["category"] == category]
 
 
 def sort_entries(entries: dict[int, dict]) -> list[dict]:

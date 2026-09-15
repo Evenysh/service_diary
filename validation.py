@@ -17,10 +17,7 @@ def can_save_entry(
     if entry_date > today:
         return "Нельзя сохранить запись: указана будущая дата"
     if mood_score < 1 or mood_score > 10:
-        return (
-            "Нельзя сохранить запись: "
-            "оценка настроения должна быть от 1 до 10"
-        )
+        return "Нельзя сохранить запись: " "оценка настроения должна быть от 1 до 10"
     if category not in VALID_CATEGORIES:
         return "Нельзя сохранить запись: неизвестная категория"
     return "Запись можно сохранить в дневник"
@@ -61,8 +58,14 @@ def create_entry(
         return None
 
     return add_entry(
-        entries, title, content, category,
-        entry_date, mood_score, user_name, is_private,
+        entries,
+        title,
+        content,
+        category,
+        entry_date,
+        mood_score,
+        user_name,
+        is_private,
     )
 
 

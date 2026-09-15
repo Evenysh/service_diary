@@ -2,8 +2,12 @@
 
 from datetime import date
 
-from entries import (filter_entries_by_category, find_entry,
-                     get_entries_statistics, sort_entries)
+from entries import (
+    filter_entries_by_category,
+    find_entry,
+    get_entries_statistics,
+    sort_entries,
+)
 from storage import load_categories, load_entries, save_entries
 from utils import input_date, input_int, input_str
 from validation import can_save_entry, create_entry, delete_entry
@@ -94,8 +98,15 @@ def main() -> None:
             is_private = private_answer == "да"
 
             result = create_entry(
-                entries, title, content, category,
-                entry_date, mood_score, user_name, is_private, today,
+                entries,
+                title,
+                content,
+                category,
+                entry_date,
+                mood_score,
+                user_name,
+                is_private,
+                today,
             )
             if result:
                 save_entries(ENTRIES_FILE, entries)
