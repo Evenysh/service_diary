@@ -21,3 +21,5 @@ Thumbs.db
 # переменные окружения
 .env
 .env.*
+
+data/*.json
