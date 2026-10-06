@@ -3,7 +3,7 @@
 from datetime import date
 from pathlib import Path
 
-from models import CategoryEntity, DateEntity, PublicEntryEntity, UserEntity
+from models import CategoryEntity, DateEntity, EntryEntity, PublicEntryEntity, UserEntity
 from storage import (
     load_categories,
     load_dates,
@@ -18,7 +18,7 @@ def test_save_and_load_entries(tmp_path: Path) -> None:
     users = [UserEntity(1, "Анна", "anna@example.com")]
     categories = [CategoryEntity(1, "учеба")]
     dates = [DateEntity(1, date(2026, 9, 8))]
-    entries = [
+    entries: list[EntryEntity] = [
         PublicEntryEntity(
             1,
             users[0],

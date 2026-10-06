@@ -5,6 +5,7 @@ from datetime import date
 from models import (
     CategoryEntity,
     DateEntity,
+    EntryEntity,
     PrivateEntryEntity,
     PublicEntryEntity,
     UserEntity,
@@ -121,7 +122,7 @@ def test_validate_mood() -> None:
 
 
 def test_add_entry() -> None:
-    entries = []
+    entries: list[EntryEntity] = []
     add_entry(
         entries,
         _sample_user(),
@@ -137,7 +138,7 @@ def test_add_entry() -> None:
 
 
 def test_find_entry() -> None:
-    entries = []
+    entries: list[EntryEntity] = []
     add_entry(
         entries,
         _sample_user(),
@@ -152,7 +153,7 @@ def test_find_entry() -> None:
 
 
 def test_sort_entries() -> None:
-    entries = []
+    entries: list[EntryEntity] = []
     user = _sample_user()
     category = _sample_category("личное")
     add_entry(
@@ -180,7 +181,7 @@ def test_sort_entries() -> None:
 
 
 def test_filter_entries_by_category() -> None:
-    entries = []
+    entries: list[EntryEntity] = []
     user = _sample_user()
     study = CategoryEntity(1, "учеба")
     work = CategoryEntity(2, "работа")
@@ -193,7 +194,7 @@ def test_filter_entries_by_category() -> None:
 
 
 def test_filter_entries_by_date() -> None:
-    entries = []
+    entries: list[EntryEntity] = []
     user = _sample_user()
     category = _sample_category()
     first_day = _sample_date(8, 1)
@@ -206,7 +207,7 @@ def test_filter_entries_by_date() -> None:
 
 
 def test_create_entry() -> None:
-    entries = []
+    entries: list[EntryEntity] = []
     today = date(2026, 9, 12)
     result = create_entry(
         entries,
@@ -228,7 +229,7 @@ def test_create_entry() -> None:
 
 
 def test_create_entry_invalid_category() -> None:
-    entries = []
+    entries: list[EntryEntity] = []
     today = date(2026, 9, 12)
     result = create_entry(
         entries,
@@ -247,7 +248,7 @@ def test_create_entry_invalid_category() -> None:
 
 
 def test_delete_entry() -> None:
-    entries = []
+    entries: list[EntryEntity] = []
     entry = add_entry(
         entries,
         _sample_user(),

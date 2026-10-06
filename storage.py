@@ -57,17 +57,13 @@ def load_categories(filename: str) -> list[CategoryEntity]:
     """Загрузить категории из JSON-файла."""
     data = _read_json(filename, DEFAULT_CATEGORIES)
     if data and isinstance(data[0], str):
-        data = [
-            {"id": index, "name": name} for index, name in enumerate(data, start=1)
-        ]
+        data = [{"id": index, "name": name} for index, name in enumerate(data, start=1)]
     return [CategoryEntity.from_data(item) for item in data]
 
 
 def save_categories(filename: str, categories: list[CategoryEntity]) -> None:
     """Сохранить объекты CategoryEntity в JSON-файл."""
-    payload = [
-        {"id": category.id, "name": category.name} for category in categories
-    ]
+    payload = [{"id": category.id, "name": category.name} for category in categories]
     _write_json(filename, payload)
 
 

@@ -203,9 +203,9 @@ def main() -> None:
 
         elif choice == "2":
             query = input_str("Подстрока в заголовке: ")
-            found = find_entry(entries, query)
-            if found:
-                for entry in found:
+            found_entries = find_entry(entries, query)
+            if found_entries:
+                for entry in found_entries:
                     print(entry)
             else:
                 print("Записи не найдены.")
@@ -249,9 +249,9 @@ def main() -> None:
 
         elif choice == "10":
             query = input_str("Имя или email: ")
-            found = find_user(users, query)
-            if found:
-                for user in found:
+            found_users = find_user(users, query)
+            if found_users:
+                for user in found_users:
                     print(user)
             else:
                 print("Пользователи не найдены.")
