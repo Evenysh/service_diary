@@ -39,3 +39,16 @@ def index(request: HttpRequest) -> HttpResponse:
 <a href="/entries/" class="btn btn-secondary">Записи</a>
 """
     return HttpResponse(page("Дневник", content))
+
+
+def page_not_found(request: HttpRequest, exception: Exception) -> HttpResponse:
+    """Своя страница 404 для адресов без маршрута."""
+    content = """
+<h1 class="text-danger">404 – страница не найдена</h1>
+<p>Проверьте адрес или вернитесь на главную.</p>
+<a href="/" class="btn btn-primary">На главную</a>
+"""
+    return HttpResponse(
+        page("404 – страница не найдена", content),
+        status=404,
+    )

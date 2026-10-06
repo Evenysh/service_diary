@@ -3,7 +3,13 @@
 from datetime import date
 from pathlib import Path
 
-from models import CategoryEntity, DateEntity, EntryEntity, PublicEntryEntity, UserEntity
+from models import (
+    CategoryEntity,
+    DateEntity,
+    EntryEntity,
+    PublicEntryEntity,
+    UserEntity,
+)
 from storage import (
     load_categories,
     load_dates,

@@ -44,13 +44,13 @@ def category_detail(request: HttpRequest, category_id: int) -> HttpResponse:
     category = find_category_by_id(categories, category_id)
     if category is None:
         content = """
-<h1 class="text-danger">Категория не найдена</h1>
+<h1 class="text-danger">404 – категория не найдена</h1>
 <a href="/categories/" class="btn btn-outline-secondary">
 ← к списку категорий
 </a>
 """
         return HttpResponse(
-            page("Категория не найдена", content),
+            page("404 – категория не найдена", content),
             status=404,
         )
 

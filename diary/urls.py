@@ -9,3 +9,5 @@ urlpatterns = [
     path("categories/", include("categories.urls")),
     path("entries/", include("entries.urls")),
 ]
+
+handler404 = "homepage.views.page_not_found"

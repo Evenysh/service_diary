@@ -167,6 +167,10 @@ PublicEntryEntity / PrivateEntryEntity ──является──► EntryEnti
 - `/entries/<int:entry_id>/` — запись (`entry_detail()`).
 
 Если категория или запись не найдены, страница возвращает код 404.
+Для адресов без маршрута (например `/nonexistent/`) работает
+`handler404` → `page_not_found()` в `homepage/views.py`.
+Свою страницу 404 видно при `DEBUG = False` в `diary/settings.py`
+(сейчас отладка выключена, чтобы открыть `/nonexistent/`).
 
 ## Структура проекта
 
@@ -336,7 +340,8 @@ git status
 - Django-проект `diary` и приложения `homepage`, `categories`, `entries`;
 - маршрутизация URL двух уровней;
 - просмотр категорий и записей из JSON;
-- навигация и Bootstrap 5.3.
+- навигация и Bootstrap 5.3;
+- своя страница 404 (`handler404`).
 
 Планируется:
 

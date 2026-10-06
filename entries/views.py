@@ -45,13 +45,13 @@ def entry_detail(request: HttpRequest, entry_id: int) -> HttpResponse:
     entry = find_entry_by_id(entries, entry_id)
     if entry is None:
         content = """
-<h1 class="text-danger">Запись не найдена</h1>
+<h1 class="text-danger">404 – запись не найдена</h1>
 <a href="/entries/" class="btn btn-outline-secondary">
 ← к списку записей
 </a>
 """
         return HttpResponse(
-            page("Запись не найдена", content),
+            page("404 – запись не найдена", content),
             status=404,
         )
 
