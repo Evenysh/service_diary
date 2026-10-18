@@ -1,0 +1,29 @@
+body {
+    min-height: 100vh;
+}
+
+.diary-logo {
+    width: 72px;
+    height: auto;
+    margin: 1rem;
+}
+
+.category-card,
+.entry-card {
+    margin-bottom: 1rem;
+    padding: 0.25rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.entry-status {
+    font-weight: 600;
+}
+
+.entry-status-private {
+    letter-spacing: 0.02em;
+}
+
+.entry-status-public {
+    letter-spacing: 0.02em;
+}

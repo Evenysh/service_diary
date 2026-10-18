@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}
+Категории – Дневник
+{% endblock %}
+{% block content %}
+<h1>Категории</h1>
+<p>
+Всего категорий: {{ categories|length }}
+</p>
+{% for category in categories %}
+{% include "categories/includes/category_card.html" %}
+{% empty %}
+<p>Категории не найдены.</p>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}
+Записи – Дневник
+{% endblock %}
+{% block content %}
+<h1>Записи</h1>
+<p>
+Всего записей: {{ entries|length }}
+</p>
+{% for entry in entries %}
+<article class="card entry-card mb-3">
+<div class="card-body d-flex justify-content-between align-items-center">
+<div>
+<a href="{% url 'entries:detail' entry.id %}">
+{{ entry.title|default:"Без заголовка" }}
+</a>
+<p class="card-text mb-0">
+{{ entry.category.name }} · {{ entry.user.name }}
+</p>
+</div>
+{% include "entries/includes/entry_status.html" %}
+</div>
+</article>
+{% empty %}
+<p>Записи не найдены.</p>
+{% endfor %}
+{% endblock %}

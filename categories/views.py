@@ -1,8 +1,8 @@
 """View-функции категорий дневника."""
 
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render
 
-from homepage.views import page
 from models import EntryEntity
 from models.categories import find_category_by_id
 from models.entries import filter_entries_by_category
@@ -24,57 +24,27 @@ def _load_entries() -> list[EntryEntity]:
 
 def categories_list(request: HttpRequest) -> HttpResponse:
     """Страница списка категорий."""
-    items = ""
-    for category in load_categories(CATEGORIES_FILE):
-        items += (
-            '<li class="list-group-item">'
-            f'<a href="/categories/{category.id}/">{category.name}</a>'
-            "</li>"
-        )
-    content = f"""
-<h1>Категории</h1>
-<ul class="list-group">{items}</ul>
-"""
-    return HttpResponse(page("Дневник – категории", content))
+    categories = load_categories(CATEGORIES_FILE)
+    context = {
+        "categories": categories,
+    }
+    return render(request, "categories/category_list.html", context)
 
 
 def category_detail(request: HttpRequest, category_id: int) -> HttpResponse:
     """Страница одной категории."""
     categories = load_categories(CATEGORIES_FILE)
     category = find_category_by_id(categories, category_id)
-    if category is None:
-        content = """
-<h1 class="text-danger">404 – категория не найдена</h1>
-<a href="/categories/" class="btn btn-outline-secondary">
-← к списку категорий
-</a>
-"""
-        return HttpResponse(
-            page("404 – категория не найдена", content),
-            status=404,
-        )
-
-    items = ""
-    for entry in filter_entries_by_category(_load_entries(), category):
-        items += (
-            '<li class="list-group-item">'
-            f'<a href="/entries/{entry.id}/">{entry.title}</a>'
-            "</li>"
-        )
-    if not items:
-        items = '<li class="list-group-item">Записей в этой категории нет.</li>'
-
-    content = f"""
-<div class="card">
-<div class="card-body">
-<h5 class="card-title">{category.name}</h5>
-<p class="card-text"><strong>ID:</strong> {category.id}</p>
-<h6 class="mt-3">Записи категории</h6>
-<ul class="list-group">{items}</ul>
-<a href="/categories/" class="btn btn-outline-secondary mt-3">
-← к списку категорий
-</a>
-</div>
-</div>
-"""
-    return HttpResponse(page(category.name, content), status=200)
+    entries = []
+    if category is not None:
+        entries = filter_entries_by_category(_load_entries(), category)
+    context = {
+        "category": category,
+        "entries": entries,
+    }
+    return render(
+        request,
+        "categories/category_detail.html",
+        context,
+        status=404 if category is None else 200,
+    )

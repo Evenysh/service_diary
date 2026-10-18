@@ -1,0 +1,9 @@
+{% if entry.is_private %}
+<span class="badge bg-secondary entry-status entry-status-private">
+Приватная
+</span>
+{% else %}
+<span class="badge bg-success entry-status entry-status-public">
+Публичная
+</span>
+{% endif %}

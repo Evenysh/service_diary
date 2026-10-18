@@ -1,0 +1,16 @@
+<article class="card category-card mb-3">
+<div class="card-body">
+<h2 class="card-title">
+{{ category.name|default:"Без названия" }}
+</h2>
+<p class="card-text">
+<strong>ID:</strong> {{ category.id }}
+</p>
+<a
+href="{% url 'categories:detail' category.id %}"
+class="btn btn-primary"
+>
+Подробнее
+</a>
+</div>
+</article>

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}
+{% if entry %}
+{{ entry.title }} – Дневник
+{% else %}
+Запись не найдена – Дневник
+{% endif %}
+{% endblock %}
+{% block content %}
+{% if entry %}
+<div class="card">
+<div class="card-body">
+<h1 class="card-title">
+{{ entry.title|default:"Без заголовка" }}
+</h1>
+<p class="card-text">
+<strong>ID:</strong> {{ entry.id }}
+</p>
+<p class="card-text">
+<strong>Автор:</strong> {{ entry.user.name }}
+</p>
+<p class="card-text">
+<strong>Категория:</strong> {{ entry.category.name }}
+</p>
+<p class="card-text">
+<strong>Дата:</strong> {{ entry.entry_date.value|date:"d.m.Y" }}
+</p>
+<p class="card-text">
+<strong>Настроение:</strong> {{ entry.mood_score }}
+</p>
+<p class="card-text">
+<strong>Статус:</strong>
+{% include "entries/includes/entry_status.html" %}
+</p>
+<p class="card-text">
+<strong>Содержание:</strong> {{ entry.content_for_display }}
+</p>
+</div>
+</div>
+{% else %}
+<h1 class="text-danger">
+404 – запись не найдена
+</h1>
+<p>
+Запись с указанным идентификатором отсутствует.
+</p>
+{% endif %}
+<a
+href="{% url 'entries:list' %}"
+class="btn btn-outline-secondary mt-3"
+>
+← к списку записей
+</a>
+{% endblock %}

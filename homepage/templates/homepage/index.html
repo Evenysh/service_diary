@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}
+Главная – Дневник
+{% endblock %}
+{% block content %}
+<h1 class="display-4">Сервис ведения дневника</h1>
+<p class="lead">
+Личный дневник с привязкой записи к пользователю, категории и дате.
+</p>
+<p>Основные разделы:</p>
+<a href="{% url 'categories:list' %}" class="btn btn-primary me-2">
+Категории
+</a>
+<a href="{% url 'entries:list' %}" class="btn btn-secondary">
+Записи
+</a>
+{% endblock %}
