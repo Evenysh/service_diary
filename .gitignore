@@ -23,4 +23,5 @@ Thumbs.db
 .env.*
 
 data/*.json
+data/*.sqlite
 db.sqlite3

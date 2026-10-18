@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}
+Записи по дате – Дневник
+{% endblock %}
+{% block content %}
+<h1>Поиск записей по дате</h1>
+<form method="get">
+<label for="date">
+Дата:
+</label>
+<input
+id="date"
+type="date"
+name="date"
+value="{{ entry_date }}"
+>
+<button type="submit">
+Найти
+</button>
+</form>
+{% if entry_date %}
+<p>
+Найдено записей: {{ entries|length }}
+</p>
+{% endif %}
+{% for entry in entries %}
+<article class="card entry-card mb-3">
+<div class="card-body">
+<a href="{% url 'entries:detail' entry.id %}">
+{{ entry.title }}
+</a>
+<p class="card-text mb-0">
+{{ entry.category_name }} · {{ entry.user_name }}
+</p>
+</div>
+</article>
+{% empty %}
+{% if entry_date %}
+<p>Записи на выбранную дату не найдены.</p>
+{% endif %}
+{% endfor %}
+{% endblock %}

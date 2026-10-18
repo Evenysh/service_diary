@@ -11,7 +11,13 @@
 <a href="{% url 'categories:list' %}" class="btn btn-primary me-2">
 Категории
 </a>
-<a href="{% url 'entries:list' %}" class="btn btn-secondary">
+<a href="{% url 'entries:list' %}" class="btn btn-secondary me-2">
 Записи
+</a>
+<a href="{% url 'entries:by_date' %}" class="btn btn-outline-primary me-2">
+По дате
+</a>
+<a href="{% url 'entries:statistics' %}" class="btn btn-outline-secondary">
+Статистика
 </a>
 {% endblock %}

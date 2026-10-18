@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}
+Статистика – Дневник
+{% endblock %}
+{% block content %}
+<h1>Статистика по категориям</h1>
+<table class="table">
+<thead>
+<tr>
+<th>Категория</th>
+<th>Количество записей</th>
+</tr>
+</thead>
+<tbody>
+{% for row in statistics %}
+<tr>
+<td>{{ row.category_name }}</td>
+<td>{{ row.entries_count }}</td>
+</tr>
+{% empty %}
+<tr>
+<td colspan="2">Нет данных.</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}

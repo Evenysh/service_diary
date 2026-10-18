@@ -1,19 +1,22 @@
 # Сервис ведения дневника
 
 Консольное приложение ПР3 дополнено веб-интерфейсом на Django.
-Страницы формируются шаблонами Django (ПР6): базовый шаблон, контекст,
-циклы, условия, именованные URL и статические файлы.
+Страницы формируются шаблонами Django (ПР6). Данные для списков
+и статистики читаются из SQLite запросами SQL (ПР7), без ORM.
 Создание и удаление через веб-формы будут добавлены на следующих практиках.
 
 ## Возможности
 
-Веб-интерфейс (ПР6):
+Веб-интерфейс (ПР6–ПР7):
 
 - главная страница с навигацией;
 - просмотр списка категорий и карточки категории;
 - просмотр списка записей и карточки записи;
+- поиск записей по дате (`GET`);
+- статистика числа записей по категориям;
 - шаблоны Django (`extends`, `include`, `{% url %}`);
-- собственные CSS, изображение и JavaScript.
+- собственные CSS, изображение и JavaScript;
+- выборка данных из SQLite (`sqlite3`, параметризованные запросы).
 
 Консольная версия (ПР3) сохранена:
 
@@ -27,6 +30,7 @@
 
 - Python 3;
 - Django 5.2 — веб-фреймворк;
+- SQLite и модуль `sqlite3`;
 - Django Template Language;
 - HTML, CSS, JavaScript и Bootstrap 5.3;
 - pytest;
@@ -150,22 +154,38 @@ PublicEntryEntity / PrivateEntryEntity ──является──► EntryEnti
 
 ## Хранение данных
 
-Данные приложения хранятся в JSON-файлах:
+JSON (консоль ПР3 и карточки детализации):
 
 - `data/users.json`;
 - `data/categories.json`;
 - `data/dates.json`;
 - `data/entries.json`.
 
-При загрузке данные из JSON преобразуются в объекты `UserEntity`, `CategoryEntity`, `DateEntity` и `EntryEntity`.
-При сохранении объекты преобразуются в данные JSON.
+SQLite (списки, поиск по дате и статистика, ПР7):
+
+- файл базы: `data/diary.sqlite`;
+- схема: `sql/schema.sql`;
+- примеры запросов: `sql/queries.sql`;
+- подключение: `db/database.py` (`PRAGMA foreign_keys = ON`);
+- импорт JSON → SQLite: `python -m db.import_json`.
+
+Таблицы: `users`, `categories`, `dates`, `entries`.
+Связи записей заданы внешними ключами `user_id`, `category_id`, `date_id`.
+Приватность хранится как `INTEGER` (`0` / `1`).
+Даты хранятся как `TEXT` в формате `YYYY-MM-DD`.
+
+Списки категорий и записей, поиск по дате и статистика
+читаются SQL-запросами. Карточки одной категории и одной записи
+по-прежнему собираются из объектов ПР3.
 
 ## Страницы веб-интерфейса
 
 - `/` — главная страница (`index()`);
-- `/categories/` — список категорий (`categories_list()`);
+- `/categories/` — список категорий из SQLite (`categories_list()`);
 - `/categories/<int:category_id>/` — категория (`category_detail()`);
-- `/entries/` — список записей (`entries_list()`);
+- `/entries/` — список записей из SQLite, JOIN (`entries_list()`);
+- `/entries/by-date/` — поиск записей по дате (`entries_by_date()`);
+- `/entries/statistics/` — статистика по категориям (`statistics()`);
 - `/entries/<int:entry_id>/` — запись (`entry_detail()`).
 
 Если категория или запись не найдены, шаблон показывает сообщение,
@@ -209,6 +229,12 @@ service_diary/
 │   └── templates/entries/
 │
 ├── models/
+├── db/
+│   ├── database.py
+│   └── import_json.py
+├── sql/
+│   ├── schema.sql
+│   └── queries.sql
 ├── data/
 └── tests/
 ```
@@ -235,13 +261,25 @@ service_diary/
 
 ### `categories/`
 
-Список и карточка категории. View передаёт объекты в контекст,
-шаблон выводит их через `{% for %}` и `{% include %}`.
+Список категорий читается из SQLite. Карточка категории по-прежнему
+собирается из объектов ПР3.
 
 ### `entries/`
 
-Список и карточка записи. Статус приватности вынесен в
-`includes/entry_status.html`.
+Список записей — SQL `JOIN`. Поиск по дате — форма `GET` и параметр `?`.
+Статистика — `GROUP BY` и `COUNT`. Карточка записи — объекты ПР3.
+Статус приватности вынесен в `includes/entry_status.html`.
+
+### `db/`
+
+`get_connection()` открывает `data/diary.sqlite`, включает внешние ключи
+и `row_factory = sqlite3.Row`. `import_json.py` переносит JSON в таблицы
+через `executemany` и `commit`.
+
+### `sql/`
+
+Схема таблиц и набор SQL-запросов (выборка, `WHERE`, `JOIN`, агрегаты,
+`GROUP BY`, `HAVING`).
 
 ### `models/users.py`
 
@@ -287,6 +325,7 @@ service_diary/
 
 - Python 3.x;
 - Django 5.2;
+- SQLite (входит в стандартную библиотеку Python);
 - pytest;
 - flake8.
 
@@ -305,6 +344,12 @@ python manage.py runserver
 ```
 
 Открыть в браузере: http://127.0.0.1:8000/
+
+Создать таблицы и загрузить JSON:
+
+```bash
+python -m db.import_json
+```
 
 Консольная версия:
 
@@ -370,17 +415,16 @@ git status
 
 ## Текущее состояние и план развития
 
-Реализовано (ПР6):
+Реализовано (ПР7):
 
-- Django-проект `diary` и приложения `homepage`, `categories`, `entries`;
-- шаблоны вместо функции `page()`;
-- навигация, Bootstrap 5.3 и собственные static-файлы;
-- просмотр категорий и записей из JSON;
-- своя страница 404 (`handler404`).
+- схема SQLite и импорт из JSON;
+- списки категорий и записей через `sqlite3`;
+- поиск записей по дате и статистика;
+- шаблоны ПР6 сохранены.
 
 Планируется:
 
-- Django ORM и база данных;
+- Django ORM;
 - формы создания записей;
 - API и контейнеризация.
 

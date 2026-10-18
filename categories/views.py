@@ -3,6 +3,7 @@
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
+from db.database import get_connection
 from models import EntryEntity
 from models.categories import find_category_by_id
 from models.entries import filter_entries_by_category
@@ -23,8 +24,18 @@ def _load_entries() -> list[EntryEntity]:
 
 
 def categories_list(request: HttpRequest) -> HttpResponse:
-    """Страница списка категорий."""
-    categories = load_categories(CATEGORIES_FILE)
+    """Страница списка категорий из SQLite."""
+    conn = get_connection()
+    categories = conn.execute(
+        """
+        SELECT
+            id,
+            name
+        FROM categories
+        ORDER BY name;
+        """
+    ).fetchall()
+    conn.close()
     context = {
         "categories": categories,
     }
@@ -32,10 +43,10 @@ def categories_list(request: HttpRequest) -> HttpResponse:
 
 
 def category_detail(request: HttpRequest, category_id: int) -> HttpResponse:
-    """Страница одной категории."""
+    """Страница одной категории (объекты ПР3)."""
     categories = load_categories(CATEGORIES_FILE)
     category = find_category_by_id(categories, category_id)
-    entries = []
+    entries: list[EntryEntity] = []
     if category is not None:
         entries = filter_entries_by_category(_load_entries(), category)
     context = {
