@@ -1,120 +1,154 @@
 """View-функции дневниковых записей."""
 
+from datetime import datetime
+
+from django.core.paginator import Paginator
+from django.db.models import Avg, Count, F, Q
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
-from db.database import get_connection
-from models import EntryEntity
-from models.entries import find_entry_by_id
-from storage import load_categories, load_dates, load_entries, load_users
+from categories.models import Category
+from entries.models import Entry
+from users.models import User
 
-USERS_FILE = "data/users.json"
-CATEGORIES_FILE = "data/categories.json"
-DATES_FILE = "data/dates.json"
-ENTRIES_FILE = "data/entries.json"
-
-
-def _load_entries() -> list[EntryEntity]:
-    """Загрузить записи вместе со связанными объектами ПР3."""
-    users = load_users(USERS_FILE)
-    categories = load_categories(CATEGORIES_FILE)
-    dates = load_dates(DATES_FILE)
-    return load_entries(ENTRIES_FILE, users, categories, dates)
+SORT_FIELDS = {
+    "date": "entry_date__value",
+    "category": "category__name",
+    "title": "title",
+    "mood": "mood_score",
+}
 
 
 def entries_list(request: HttpRequest) -> HttpResponse:
-    """Список записей из SQLite со связанными данными."""
-    conn = get_connection()
-    entries = conn.execute(
-        """
-        SELECT
-            entries.id,
-            entries.title,
-            entries.is_private,
-            users.name AS user_name,
-            categories.name AS category_name,
-            dates.value AS entry_date
-        FROM entries
-        JOIN users
-            ON entries.user_id = users.id
-        JOIN categories
-            ON entries.category_id = categories.id
-        JOIN dates
-            ON entries.date_id = dates.id
-        ORDER BY dates.value;
-        """
-    ).fetchall()
-    conn.close()
+    """Список записей с фильтром, поиском, сортировкой и пагинацией."""
+    entry_date = request.GET.get("date", "").strip()
+    category_id = request.GET.get("category", "").strip()
+    user_id = request.GET.get("user", "").strip()
+    visibility = request.GET.get("visibility", "").strip()
+    query = request.GET.get("q", "").strip()
+    author = request.GET.get("author", "").strip()
+    sort = request.GET.get("sort", "date")
+    error = None
+
+    entries_data = Entry.objects.all()
+
+    if visibility == "public":
+        entries_data = entries_data.exclude(is_private=True)
+    elif visibility == "private":
+        entries_data = entries_data.filter(is_private=True)
+
+    if entry_date:
+        try:
+            selected_date = datetime.strptime(entry_date, "%Y-%m-%d").date()
+        except ValueError:
+            error = "Укажите корректную дату."
+        else:
+            entries_data = entries_data.filter(entry_date__value=selected_date)
+
+    if category_id.isdigit():
+        entries_data = entries_data.filter(category_id=int(category_id))
+    if user_id.isdigit():
+        entries_data = entries_data.filter(user_id=int(user_id))
+
+    if query:
+        entries_data = entries_data.filter(
+            Q(title__icontains=query) | Q(content__icontains=query)
+        )
+    if author:
+        entries_data = entries_data.filter(user__name__icontains=author)
+
+    sort_field = SORT_FIELDS.get(sort, "entry_date__value")
+    entries_data = (
+        entries_data.select_related("user", "category", "entry_date")
+        .annotate(
+            category_name=F("category__name"),
+            user_name=F("user__name"),
+        )
+        .order_by(sort_field, "id")
+        .values(
+            "id",
+            "title",
+            "is_private",
+            "category_name",
+            "user_name",
+        )
+    )
+
+    paginator = Paginator(entries_data, 2)
+    page_obj = paginator.get_page(request.GET.get("page"))
     context = {
-        "entries": entries,
+        "entries": page_obj,
+        "page_obj": page_obj,
+        "entry_date": entry_date,
+        "selected_category": category_id,
+        "selected_user": user_id,
+        "visibility": visibility,
+        "query": query,
+        "author": author,
+        "sort": sort,
+        "categories": Category.objects.order_by("name"),
+        "users": User.objects.order_by("name"),
+        "error": error,
     }
     return render(request, "entries/entry_list.html", context)
 
 
 def entries_by_date(request: HttpRequest) -> HttpResponse:
     """Поиск записей на выбранную дату."""
-    entry_date = request.GET.get("date")
+    entry_date = request.GET.get("date", "").strip()
     entries = []
+    error = None
     if entry_date:
-        conn = get_connection()
-        entries = conn.execute(
-            """
-            SELECT
-                entries.id,
-                entries.title,
-                users.name AS user_name,
-                categories.name AS category_name
-            FROM entries
-            JOIN dates
-                ON entries.date_id = dates.id
-            JOIN users
-                ON entries.user_id = users.id
-            JOIN categories
-                ON entries.category_id = categories.id
-            WHERE dates.value = ?
-            ORDER BY entries.title;
-            """,
-            [entry_date],
-        ).fetchall()
-        conn.close()
+        try:
+            selected_date = datetime.strptime(entry_date, "%Y-%m-%d").date()
+        except ValueError:
+            error = "Укажите корректную дату."
+        else:
+            entries = (
+                Entry.objects.filter(entry_date__value=selected_date)
+                .select_related("user", "category")
+                .annotate(
+                    category_name=F("category__name"),
+                    user_name=F("user__name"),
+                )
+                .order_by("title")
+            )
     context = {
         "entries": entries,
         "entry_date": entry_date,
+        "error": error,
     }
     return render(request, "entries/entries_by_date.html", context)
 
 
 def statistics(request: HttpRequest) -> HttpResponse:
-    """Статистика: число записей по категориям."""
-    conn = get_connection()
-    statistics_data = conn.execute(
-        """
-        SELECT
-            categories.name AS category_name,
-            COUNT(entries.id) AS entries_count
-        FROM categories
-        LEFT JOIN entries
-            ON categories.id = entries.category_id
-        GROUP BY categories.id, categories.name
-        ORDER BY entries_count DESC;
-        """
-    ).fetchall()
-    conn.close()
+    """Статистика: число записей по категориям и среднее настроение."""
+    statistics_data = (
+        Category.objects.annotate(
+            entries_count=Count("entries"),
+            category_name=F("name"),
+        )
+        .values("category_name", "entries_count")
+        .order_by("-entries_count")
+    )
+    mood_stats = Entry.objects.aggregate(
+        avg_mood=Avg("mood_score"),
+        entries_total=Count("id"),
+    )
     context = {
         "statistics": statistics_data,
+        "mood_stats": mood_stats,
     }
     return render(request, "entries/statistics.html", context)
 
 
 def entry_detail(request: HttpRequest, entry_id: int) -> HttpResponse:
-    """Страница одной дневниковой записи (объекты ПР3)."""
-    entry = find_entry_by_id(_load_entries(), entry_id)
+    """Страница одной дневниковой записи."""
+    entry = get_object_or_404(
+        Entry.objects.select_related("user", "category", "entry_date"),
+        pk=entry_id,
+    )
     context = {
         "entry": entry,
     }
-    return render(
-        request,
-        "entries/entry_detail.html",
-        context,
-        status=404 if entry is None else 200,
-    )
+    return render(request, "entries/entry_detail.html", context)

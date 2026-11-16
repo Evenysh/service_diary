@@ -4,8 +4,123 @@
 {% endblock %}
 {% block content %}
 <h1>Записи</h1>
+<form method="get" class="mb-4">
+<div class="row g-3 align-items-end">
+<div class="col-md-3">
+<label for="date" class="form-label">Дата</label>
+<input
+class="form-control"
+id="date"
+type="date"
+name="date"
+value="{{ entry_date }}"
+>
+</div>
+<div class="col-md-3">
+<label for="category" class="form-label">Категория</label>
+<select class="form-select" id="category" name="category">
+<option value="">Все категории</option>
+{% for category in categories %}
+<option
+value="{{ category.pk }}"
+{% if selected_category == category.pk|stringformat:"s" %}
+selected
+{% endif %}
+>
+{{ category.name }}
+</option>
+{% endfor %}
+</select>
+</div>
+<div class="col-md-3">
+<label for="user" class="form-label">Автор</label>
+<select class="form-select" id="user" name="user">
+<option value="">Все авторы</option>
+{% for user in users %}
+<option
+value="{{ user.pk }}"
+{% if selected_user == user.pk|stringformat:"s" %}
+selected
+{% endif %}
+>
+{{ user.name }}
+</option>
+{% endfor %}
+</select>
+</div>
+<div class="col-md-3">
+<label for="visibility" class="form-label">Видимость</label>
+<select class="form-select" id="visibility" name="visibility">
+<option value="" {% if visibility == "" %}selected{% endif %}>
+Все
+</option>
+<option
+value="public"
+{% if visibility == "public" %}selected{% endif %}
+>
+Публичные
+</option>
+<option
+value="private"
+{% if visibility == "private" %}selected{% endif %}
+>
+Приватные
+</option>
+</select>
+</div>
+<div class="col-md-3">
+<label for="q" class="form-label">Поиск по тексту</label>
+<input
+class="form-control"
+id="q"
+type="text"
+name="q"
+value="{{ query }}"
+>
+</div>
+<div class="col-md-3">
+<label for="author" class="form-label">Поиск по имени</label>
+<input
+class="form-control"
+id="author"
+type="text"
+name="author"
+value="{{ author }}"
+>
+</div>
+<div class="col-md-3">
+<label for="sort" class="form-label">Сортировать по</label>
+<select class="form-select" id="sort" name="sort">
+<option value="date" {% if sort == "date" %}selected{% endif %}>
+Дате
+</option>
+<option
+value="category"
+{% if sort == "category" %}selected{% endif %}
+>
+Категории
+</option>
+<option value="title" {% if sort == "title" %}selected{% endif %}>
+Заголовку
+</option>
+<option value="mood" {% if sort == "mood" %}selected{% endif %}>
+Настроению
+</option>
+</select>
+</div>
+<div class="col-md-3">
+<button type="submit" class="btn btn-primary">Найти</button>
+<a href="{% url 'entries:list' %}" class="btn btn-outline-secondary">
+Сбросить
+</a>
+</div>
+</div>
+</form>
+{% if error %}
+<p class="text-danger">{{ error }}</p>
+{% endif %}
 <p>
-Всего записей: {{ entries|length }}
+Всего записей: {{ page_obj.paginator.count }}
 </p>
 <p>
 <a href="{% url 'entries:by_date' %}">Найти по дате</a>
@@ -27,4 +142,54 @@
 {% empty %}
 <p>Записи не найдены.</p>
 {% endfor %}
+{% if page_obj.paginator.num_pages > 1 %}
+<nav aria-label="Навигация по страницам">
+<ul class="pagination justify-content-center">
+{% if page_obj.has_previous %}
+<li class="page-item">
+<a
+class="page-link"
+href="{% querystring page=page_obj.previous_page_number %}"
+>
+Назад
+</a>
+</li>
+{% else %}
+<li class="page-item disabled">
+<span class="page-link">Назад</span>
+</li>
+{% endif %}
+{% for page_number in page_obj.paginator.page_range %}
+{% if page_number == page_obj.number %}
+<li class="page-item active" aria-current="page">
+<span class="page-link">{{ page_number }}</span>
+</li>
+{% else %}
+<li class="page-item">
+<a
+class="page-link"
+href="{% querystring page=page_number %}"
+>
+{{ page_number }}
+</a>
+</li>
+{% endif %}
+{% endfor %}
+{% if page_obj.has_next %}
+<li class="page-item">
+<a
+class="page-link"
+href="{% querystring page=page_obj.next_page_number %}"
+>
+Далее
+</a>
+</li>
+{% else %}
+<li class="page-item disabled">
+<span class="page-link">Далее</span>
+</li>
+{% endif %}
+</ul>
+</nav>
+{% endif %}
 {% endblock %}

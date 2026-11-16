@@ -18,7 +18,10 @@ value="{{ entry_date }}"
 Найти
 </button>
 </form>
-{% if entry_date %}
+{% if error %}
+<p class="text-danger">{{ error }}</p>
+{% endif %}
+{% if entry_date and not error %}
 <p>
 Найдено записей: {{ entries|length }}
 </p>
@@ -35,7 +38,7 @@ value="{{ entry_date }}"
 </div>
 </article>
 {% empty %}
-{% if entry_date %}
+{% if entry_date and not error %}
 <p>Записи на выбранную дату не найдены.</p>
 {% endif %}
 {% endfor %}
