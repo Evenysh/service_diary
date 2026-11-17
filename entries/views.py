@@ -33,9 +33,11 @@ def entries_list(request: HttpRequest) -> HttpResponse:
     entries_data = Entry.objects.all()
 
     if visibility == "public":
-        entries_data = entries_data.exclude(is_private=True)
+        entries_data = entries_data.public()
     elif visibility == "private":
-        entries_data = entries_data.filter(is_private=True)
+        entries_data = entries_data.private()
+    elif visibility == "archived":
+        entries_data = entries_data.archived()
 
     if entry_date:
         try:
@@ -43,7 +45,7 @@ def entries_list(request: HttpRequest) -> HttpResponse:
         except ValueError:
             error = "Укажите корректную дату."
         else:
-            entries_data = entries_data.filter(entry_date__value=selected_date)
+            entries_data = entries_data.for_date(selected_date)
 
     if category_id.isdigit():
         entries_data = entries_data.filter(category_id=int(category_id))
@@ -68,7 +70,7 @@ def entries_list(request: HttpRequest) -> HttpResponse:
         .values(
             "id",
             "title",
-            "is_private",
+            "status",
             "category_name",
             "user_name",
         )
@@ -105,7 +107,7 @@ def entries_by_date(request: HttpRequest) -> HttpResponse:
             error = "Укажите корректную дату."
         else:
             entries = (
-                Entry.objects.filter(entry_date__value=selected_date)
+                Entry.objects.for_date(selected_date)
                 .select_related("user", "category")
                 .annotate(
                     category_name=F("category__name"),
@@ -122,7 +124,7 @@ def entries_by_date(request: HttpRequest) -> HttpResponse:
 
 
 def statistics(request: HttpRequest) -> HttpResponse:
-    """Статистика: число записей по категориям и среднее настроение."""
+    """Статистика: категории, статусы записей и среднее настроение."""
     statistics_data = (
         Category.objects.annotate(
             entries_count=Count("entries"),
@@ -134,6 +136,18 @@ def statistics(request: HttpRequest) -> HttpResponse:
     mood_stats = Entry.objects.aggregate(
         avg_mood=Avg("mood_score"),
         entries_total=Count("id"),
+        public_entries=Count(
+            "id",
+            filter=Q(status=Entry.Status.PUBLIC),
+        ),
+        private_entries=Count(
+            "id",
+            filter=Q(status=Entry.Status.PRIVATE),
+        ),
+        archived_entries=Count(
+            "id",
+            filter=Q(status=Entry.Status.ARCHIVED),
+        ),
     )
     context = {
         "statistics": statistics_data,

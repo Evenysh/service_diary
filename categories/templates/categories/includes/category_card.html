@@ -7,7 +7,7 @@
 <strong>ID:</strong> {{ category.id }}
 </p>
 <a
-href="{% url 'categories:detail' category.id %}"
+href="{{ category.get_absolute_url }}"
 class="btn btn-primary"
 >
 Подробнее

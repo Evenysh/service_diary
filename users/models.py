@@ -9,9 +9,11 @@ class User(models.Model):
     name = models.CharField(
         max_length=200,
         verbose_name="Имя пользователя",
+        help_text="Отображаемое имя автора записей.",
     )
     email = models.EmailField(
         verbose_name="Электронная почта",
+        help_text="Контактный адрес автора.",
     )
 
     def __str__(self) -> str:

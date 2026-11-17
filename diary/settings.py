@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-cj2x3i=lsy=d$2#2ibzd#k#qviq*hl9(b7-136=hsegmxqu$26
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "testserver"]
 
 
 # Application definition
@@ -37,11 +37,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "homepage",
-    "users",
-    "categories",
-    "dates",
-    "entries",
+    "homepage.apps.HomepageConfig",
+    "users.apps.UsersConfig",
+    "categories.apps.CategoriesConfig",
+    "dates.apps.DatesConfig",
+    "entries.apps.EntriesConfig",
 ]
 
 MIDDLEWARE = [
@@ -53,6 +53,15 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+if DEBUG:
+    INSTALLED_APPS.append("debug_toolbar")
+    MIDDLEWARE.insert(
+        1,
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+    )
+
+INTERNAL_IPS = ["127.0.0.1"]
 
 ROOT_URLCONF = "diary.urls"
 
@@ -66,6 +75,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "categories.context_processors.site_stats",
             ],
         },
     },

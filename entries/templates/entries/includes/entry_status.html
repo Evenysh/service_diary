@@ -1,9 +1,13 @@
-{% if entry.is_private %}
+{% if entry.status == "private" %}
 <span class="badge bg-secondary entry-status entry-status-private">
 Приватная
 </span>
+{% elif entry.status == "archived" %}
+<span class="badge bg-warning text-dark entry-status entry-status-archived">
+Архивная
+</span>
 {% else %}
 <span class="badge bg-success entry-status entry-status-public">
-Публичная
+Открытая
 </span>
 {% endif %}

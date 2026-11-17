@@ -97,7 +97,11 @@ def main() -> None:
                         "title": row["title"],
                         "content": row["content"],
                         "mood_score": row["mood_score"],
-                        "is_private": bool(row["is_private"]),
+                        "status": (
+                            Entry.Status.PRIVATE
+                            if row["is_private"]
+                            else Entry.Status.PUBLIC
+                        ),
                     },
                 )
 

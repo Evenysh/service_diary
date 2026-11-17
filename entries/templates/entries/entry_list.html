@@ -66,6 +66,12 @@ value="private"
 >
 Приватные
 </option>
+<option
+value="archived"
+{% if visibility == "archived" %}selected{% endif %}
+>
+Архивные
+</option>
 </select>
 </div>
 <div class="col-md-3">

@@ -3,12 +3,13 @@
 Консольное приложение ПР3 дополнено веб-интерфейсом на Django.
 Страницы формируются шаблонами Django (ПР6).
 Данные сайта читаются через Django ORM (ПР9).
+Админка, slug категорий, GeneratedField и Debug Toolbar — ПР10.
 Исходная база ПР7 (`data/diary.sqlite`) сохранена как источник для переноса.
 Создание и удаление через веб-формы будут добавлены на следующих практиках.
 
 ## Возможности
 
-Веб-интерфейс (ПР6–ПР9):
+Веб-интерфейс (ПР6–ПР10):
 
 - главная страница с навигацией;
 - просмотр списка категорий и карточки категории;
@@ -18,7 +19,9 @@
 - статистика числа записей по категориям;
 - шаблоны Django (`extends`, `include`, `{% url %}`);
 - собственные CSS, изображение и JavaScript;
-- модели Django и запросы ORM.
+- модели Django и запросы ORM;
+- панель Django Admin, slug категории, GeneratedField;
+- статус записи (`TextChoices`) и менеджер `EntryQuerySet`.
 
 Консольная версия (ПР3) сохранена:
 
@@ -170,11 +173,14 @@ JSON (консоль ПР3):
 - схема: `sql/schema.sql`;
 - инспекция: `python db/inspect_source_db.py`.
 
-База Django ORM (ПР9):
+База Django ORM (ПР9–ПР10):
 
 - файл: `db.sqlite3`;
 - модели: `User`, `Category`, `DiaryDate`, `Entry`;
 - связи `ForeignKey` с `on_delete=PROTECT` и `related_name="entries"`;
+- у `Category` поле `slug` и метод `get_absolute_url()`;
+- у `Entry` поле `status` (`public` / `private` / `archived`) и `is_high_mood`;
+- менеджер `Entry.objects` с методами `public()`, `private()`, `archived()`, `for_date()`;
 - миграции в приложениях `users`, `categories`, `dates`, `entries`;
 - перенос: `python db/import_sqlite_to_orm.py`.
 
@@ -184,7 +190,8 @@ JSON (консоль ПР3):
 
 - `/` — главная страница (`index()`);
 - `/categories/` — список категорий (`Category.objects`);
-- `/categories/<int:category_id>/` — категория (`get_object_or_404`);
+- `/categories/<slug>/` — категория (`get_absolute_url`);
+- `/admin/` — панель администратора;
 - `/entries/` — список записей с фильтром, поиском, сортировкой и пагинацией;
 - `/entries/by-date/` — поиск записей по дате;
 - `/entries/statistics/` — статистика (`annotate` / `aggregate`);
@@ -267,22 +274,27 @@ service_diary/
 
 ### `users/`
 
-Модель `User`: имя и email автора записей.
+Модель `User`: имя и email автора записей. В админке — inline связанных записей.
 
 ### `categories/`
 
-Модель `Category`. Список и карточка категории читаются через ORM.
+Модель `Category` со `slug` и `get_absolute_url()`.
+Список и карточка категории читаются через ORM.
+Контекстный процессор `site_stats` добавляет счётчики в шаблоны.
 
 ### `dates/`
 
-Модель `DiaryDate` с полем `value` типа `DateField`.
+Модель `DiaryDate` с полем `value` типа `DateField`. Админка дат.
 
 ### `entries/`
 
 Модель `Entry` со связями на пользователя, категорию и дату.
+Поле `status` (`TextChoices`), менеджер `EntryQuerySet`.
+Поле `is_high_mood` вычисляется в БД (`GeneratedField`).
 Список — фильтр, поиск, сортировка, `Paginator`.
-Карточка — `select_related`. Статистика — `Count` и `Avg`.
-Статус приватности вынесен в `includes/entry_status.html`.
+Карточка — `select_related`. Статистика — категории и статусы.
+Статус вынесен в `includes/entry_status.html`.
+Админка записей: поиск, фильтры, автодополнение, действия.
 
 ### `db/`
 
@@ -359,6 +371,14 @@ python manage.py runserver
 
 Открыть в браузере: http://127.0.0.1:8000/
 
+Панель администратора: http://127.0.0.1:8000/admin/
+
+Суперпользователь Django Auth создаётся отдельно от модели `users.User`:
+
+```bash
+python manage.py createsuperuser
+```
+
 Миграции и перенос данных ПР7 → ORM:
 
 ```bash
@@ -432,16 +452,14 @@ git status
 
 ## Текущее состояние и план развития
 
-Реализовано (ПР9):
+Реализовано (ПР9–ПР10):
 
 - модели `User`, `Category`, `DiaryDate`, `Entry`;
 - миграции и база `db.sqlite3`;
 - перенос данных из `data/diary.sqlite`;
 - представления на Django ORM;
-- фильтр, поиск, сортировка и пагинация списка записей.
-
-Планируется:
-
-- формы создания записей;
-- API и контейнеризация.
-
+- фильтр, поиск, сортировка и пагинация списка записей;
+- Django Admin для всех моделей предметной области;
+- `slug` категории, `GeneratedField`, контекстный процессор;
+- статус записи `TextChoices` и менеджер QuerySet;
+- Django Debug Toolbar (при `DEBUG=True`).

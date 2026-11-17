@@ -8,6 +8,11 @@
 Всего записей: {{ mood_stats.entries_total }}
 </p>
 <p>
+Открытые: {{ mood_stats.public_entries }},
+приватные: {{ mood_stats.private_entries }},
+архивные: {{ mood_stats.archived_entries }}
+</p>
+<p>
 Среднее настроение:
 {% if mood_stats.avg_mood %}
 {{ mood_stats.avg_mood|floatformat:1 }}

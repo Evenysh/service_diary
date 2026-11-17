@@ -8,6 +8,7 @@ class DiaryDate(models.Model):
 
     value = models.DateField(
         verbose_name="Дата",
+        help_text="Календарный день записей дневника.",
     )
 
     def __str__(self) -> str:
